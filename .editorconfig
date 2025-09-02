@@ -1,0 +1,15 @@
+# EditorConfig base
+root = true
+
+[*.{cs,csproj}]
+indent_style = space
+indent_size = 4
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+dotnet_diagnostic.IDE0058.severity = suggestion
+dotnet_diagnostic.CA2007.severity = suggestion
+
+[*.{ts,tsx,js,jsx,html,css,scss}]
+indent_style = space
+indent_size = 2
