@@ -1,11 +1,40 @@
+using Serilog;
+using System.Reflection;
+
+// --- Serilog bootstrap (antes de crear el builder)
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Reemplaza logging por Serilog
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console());
 
+// Add services to the container.
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// MediatR: registramos el assembly de Application
+var applicationAssembly = Assembly.Load("Shiftly.Application");
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(applicationAssembly));
+
+// CORS básico para luego (Angular 17 en http://localhost:4200)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("frontend", p =>
+        p.WithOrigins("http://localhost:4200")
+         .AllowAnyHeader()
+         .AllowAnyMethod()
+         .AllowCredentials());
+});
 
 var app = builder.Build();
 
@@ -16,10 +45,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// pipeline
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
+app.UseCors("frontend");
 app.MapControllers();
 
+// Logging de arranque
+app.Logger.LogInformation("Shiftly API booted");
+
+// run
 app.Run();
+
