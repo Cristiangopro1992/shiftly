@@ -1,5 +1,7 @@
 using Serilog;
 using System.Reflection;
+using Shiftly.Infrastructure;
+
 
 // --- Serilog bootstrap (antes de crear el builder)
 Log.Logger = new LoggerConfiguration()
@@ -21,6 +23,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+// Infraestructura (EF Core)
+builder.Services.AddInfrastructure(builder.Configuration);
 
 // MediatR: registramos el assembly de Application
 var applicationAssembly = Assembly.Load("Shiftly.Application");
